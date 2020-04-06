@@ -41,56 +41,51 @@ public class ChooseAreaActivity extends Activity {
     private List<Province> provinceList;// /省列表
     private List<City> cityList;//市列表
     private List<County> countyList;//县列表
-    private Province selctedProvince;//选中的省份
+    private Province selectedProvince;//选中的省份
     private City selectedCity;//选中的市
     private int currentLevel;//当前选中的级别
     private boolean isFromWeatherActivity;//是否从WeatherActivity中跳转过来
 
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-        setContentView(R.layout.choose_area);
-
-        listView=(ListView)findViewById(R.id.list_view);
-        titleText=(TextView)findViewById(R.id.title_text);
-        adapter=new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,dataList);
-        listView.setAdapter(adapter);
-        weatherDB=WeatherDB.getInstance(this);
-
-       //isFromWeatherActivity=getIntent().getBooleanExtra("from_weather_avtivity",false);
-        SharedPreferences prefs= PreferenceManager.getDefaultSharedPreferences(this);
-        // 已经选择了城市且不是从WeatherActivity跳转过来，才会直接跳转到WeatherActivity
-        if (prefs.getBoolean("city_selected", false)
-                && !isFromWeatherActivity) {
+        SharedPreferences prefs = PreferenceManager.
+                getDefaultSharedPreferences(this);
+        if (prefs.getBoolean("city_selected", false)) {
             Intent intent = new Intent(this, WeatherActivity.class);
             startActivity(intent);
             finish();
             return;
         }
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        setContentView(R.layout.choose_area);
+        listView = (ListView) findViewById(R.id.list_view);
+
+        titleText = (TextView) findViewById(R.id.title_text);
+        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, dataList);
+        listView.setAdapter(adapter);
+        weatherDB = WeatherDB.getInstance(this);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> arg0, View view, int index, long arg3) {
-                if (currentLevel==LEVEL_PROVINCE){
-                    selctedProvince=provinceList.get(index);
+            public void onItemClick(AdapterView<?> arg0, View view, int index,
+                                    long arg3) {
+                if (currentLevel == LEVEL_PROVINCE) {
+                    selectedProvince = provinceList.get(index);
                     queryCities();
-                }
-                else if(currentLevel==LEVEL_CITY){
-                    selectedCity=cityList.get(index);
+                } else if (currentLevel == LEVEL_CITY) {
+                    selectedCity = cityList.get(index);
                     queryCounties();
-                }
-                else if (currentLevel==LEVEL_COUNTY){
-                    String countyCode = countyList.get(index).getCountyCode();
+                } else if (currentLevel == LEVEL_COUNTY) { String countyCode = countyList.get(index).getCountyCode();
                     Intent intent = new Intent(ChooseAreaActivity.this,
                             WeatherActivity.class);
                     intent.putExtra("county_code", countyCode);
                     startActivity(intent);
                     finish();
-                }
-            }
+                } }
         });
-        queryProvinces();//加载省级数据
+        queryProvinces(); // 加载省级数据
     }
+
 
     //查询全国所有的省，优先从数据库查询，如果没有查询到再去服务器上查询
     private void queryProvinces(){
@@ -112,7 +107,7 @@ public class ChooseAreaActivity extends Activity {
 
     //查询选中省内所有的市，优先从数据库查询，如果没有查询到再去服务器上查询
     private void queryCities(){
-        cityList=weatherDB.loadCities(selctedProvince.getId());
+        cityList=weatherDB.loadCities(selectedProvince.getId());
         if (cityList.size()>0) {
             dataList.clear();
             for (City city:cityList){
@@ -120,11 +115,11 @@ public class ChooseAreaActivity extends Activity {
             }
             adapter.notifyDataSetChanged();
             listView.setSelection(0);
-            titleText.setText(selctedProvince.getProvinceName());
+            titleText.setText(selectedProvince.getProvinceName());
             currentLevel=LEVEL_CITY;
         }
         else {
-            queryFromServer(selctedProvince.getProvinceCode(),"city");//????
+            queryFromServer(selectedProvince.getProvinceCode(),"city");//????
         }
     }
 
@@ -164,7 +159,7 @@ public class ChooseAreaActivity extends Activity {
                     //调用 Utility 的handleProvincesResponse()方法来解析和处理服务器返回的数据，并存储到数据库中
                     result= Utility.handleProvincesResponse(weatherDB,response);
                 }else if("city".equals(type)){
-                    result=Utility.handleCitiesResponse(weatherDB,response,selctedProvince.getId());
+                    result=Utility.handleCitiesResponse(weatherDB,response,selectedProvince.getId());
                 }else if("county".equals(type)){
                     result=Utility.handleCountiesResponse(weatherDB,response,selectedCity.getId());
                 }
@@ -228,10 +223,10 @@ public class ChooseAreaActivity extends Activity {
         } else if (currentLevel == LEVEL_CITY) {
             queryProvinces();
         } else {
-           /*if (isFromWeatherActivity){
+           if (isFromWeatherActivity){
                Intent intent=new Intent(this,WeatherActivity.class);
                startActivity(intent);
-           }*/
+           }
            finish();
         } }
 }

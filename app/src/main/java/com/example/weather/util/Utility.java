@@ -87,11 +87,11 @@ public class Utility {
             String temp2 = weatherInfo.getString("temp2");
             String weatherDesp = weatherInfo.getString("weather");
             String publishTime = weatherInfo.getString("ptime");
-            saveWeatherInfo(context, cityName, weatherCode, temp1, temp2, weatherDesp, publishTime);
+            saveWeatherInfo(context, cityName, weatherCode, temp1, temp2,
+                    weatherDesp, publishTime);
         } catch (JSONException e) {
             e.printStackTrace();
         } }
-
     //将服务器返回的所有天气信息存储到SharedPreferences文件中。
     public static void saveWeatherInfo(Context context, String cityName,
                                        String weatherCode, String temp1, String temp2, String weatherDesp, String
